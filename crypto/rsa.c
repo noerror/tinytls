@@ -322,6 +322,6 @@ void crypto_rsa_free(struct crypto_rsa_key *key)
         bignum_deinit(key->dmp1);
         bignum_deinit(key->dmq1);
         bignum_deinit(key->iqmp);
-        //free(key);
+        free(key);
     }
 }
