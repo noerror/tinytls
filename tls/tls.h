@@ -44,8 +44,8 @@ protected :
 	void SendTLSFinish(const char* label);
 	void SendTLSChangeCipherSpec();
 
-	void UpdatePreMasterSecret(const unsigned char* premaster_secret, const unsigned char* severrandom, const unsigned char* clientrandom, bool serverside);
-	void UpdateMasterSecret(const unsigned char* master_secret, const unsigned char* severrandom, const unsigned char* clientrandom, bool serverside);
+       void UpdatePreMasterSecret(const unsigned char* premaster_secret, const unsigned char* serverrandom, const unsigned char* clientrandom, bool serverside);
+       void UpdateMasterSecret(const unsigned char* master_secret, const unsigned char* serverrandom, const unsigned char* clientrandom, bool serverside);
 	void GetTLSKey(const char* label, unsigned char* key12);
 	void GetClientPacketHash(const void* msg, int msg_len, unsigned char* hash20);
 
