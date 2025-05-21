@@ -274,7 +274,7 @@ bool CTLS::TLS_ClientHello(char* ptr, int len)
 	}
 
 	// Server Hello
-	//unsigned char sessionid[32]; // Àç¿¬°á½Ã»ç¿ë (½ÇÁ¦·Î »ç¿ë¾ÈÇÔ) <- ¾ÏÈ£ ¿¬°á ÈÄ sessinoid, mastersecrectµî ÀúÀåÇØµÎ¸é ÀÌÈÄ ¿¬°á½Ã ÀÎÁõ¼­±³È¯¾øÀÌ »ç¿ëÇÒ ¼öµµ ÀÖ´Ù. (È°¿ëµµ´Â ³ôÁö ¾Ê¾Æº¸ÀÓ)
+	//unsigned char sessionid[32]; // ìž¬ì—°ê²°ì‹œì‚¬ìš© (ì‹¤ì œë¡œ ì‚¬ìš©ì•ˆí•¨) <- ì•”í˜¸ ì—°ê²° í›„ sessinoid, mastersecrectë“± ì €ìž¥í•´ë‘ë©´ ì´í›„ ì—°ê²°ì‹œ ì¸ì¦ì„œêµí™˜ì—†ì´ ì‚¬ìš©í•  ìˆ˜ë„ ìžˆë‹¤. (í™œìš©ë„ëŠ” ë†’ì§€ ì•Šì•„ë³´ìž„)
 
 	m_ServerRandom[0] = random_gmt_unix_time[0]; // random_gmt_unix_time
 	m_ServerRandom[1] = random_gmt_unix_time[1];
@@ -463,22 +463,22 @@ bool CTLS::TLS_ClientKeyExchange(char* ptr, int len)
 	return true;
 }
 
-void CTLS::UpdatePreMasterSecret(const unsigned char* premaster_secret, const unsigned char* severrandom, const unsigned char* clientrandom, bool serverside)
+void CTLS::UpdatePreMasterSecret(const unsigned char* premaster_secret, const unsigned char* serverrandom, const unsigned char* clientrandom, bool serverside)
 {
 	unsigned char seed[64];
 	memcpy(seed, clientrandom, 32);
-	memcpy(&seed[32], severrandom, 32);
+	memcpy(&seed[32], serverrandom, 32);
 
 	PRF(premaster_secret, 48, "master secret", seed, 64, m_MasterSecret, 48);
 
-	UpdateMasterSecret(m_MasterSecret, severrandom, clientrandom, serverside);
+	UpdateMasterSecret(m_MasterSecret, serverrandom, clientrandom, serverside);
 }
 
-void CTLS::UpdateMasterSecret(const unsigned char* master_secret, const unsigned char* severrandom, const unsigned char* clientrandom, bool serverside)
+void CTLS::UpdateMasterSecret(const unsigned char* master_secret, const unsigned char* serverrandom, const unsigned char* clientrandom, bool serverside)
 {
 	unsigned char seed[64];
 
-	memcpy(seed, severrandom, 32);
+	memcpy(seed, serverrandom, 32);
 	memcpy(&seed[32], clientrandom, 32);
 
 	//ase_128_cbc / keymaterial = 16, ivsize=16, blocksize=16, 
@@ -930,104 +930,104 @@ void CTLS::SetCertificate(const char* server_certificate_base64, const char* cha
 	"y/EzY5jygRoABnR3eBm15CYZwwKL9izIq1H3OhymEi/Ycg==";*/
 
 	/*
-	30 82 03 7e                            ; SEQUENCE (37e ¹ÙÀÌÆ®)
-	30 82 02 66                            ; SEQUENCE (266 ¹ÙÀÌÆ®)
-	|  a0 03                               ; OPTIONAL[0] (3 ¹ÙÀÌÆ®)
-	|  |  02 01                            ; INTEGER (1 ¹ÙÀÌÆ®)
+	30 82 03 7e                            ; SEQUENCE (37e ë°”ì´íŠ¸)
+	30 82 02 66                            ; SEQUENCE (266 ë°”ì´íŠ¸)
+	|  a0 03                               ; OPTIONAL[0] (3 ë°”ì´íŠ¸)
+	|  |  02 01                            ; INTEGER (1 ë°”ì´íŠ¸)
 	|  |     02
-	|  02 09                               ; INTEGER (9 ¹ÙÀÌÆ®)
+	|  02 09                               ; INTEGER (9 ë°”ì´íŠ¸)
 	|  |  00
 	|  |  a4 4d b0 32 9a 71 4a 8d
-	|  30 0d                               ; SEQUENCE (d ¹ÙÀÌÆ®)
-	|  |  06 09                            ; OBJECT_ID (9 ¹ÙÀÌÆ®)
+	|  30 0d                               ; SEQUENCE (d ë°”ì´íŠ¸)
+	|  |  06 09                            ; OBJECT_ID (9 ë°”ì´íŠ¸)
 	|  |  |  2a 86 48 86 f7 0d 01 01  0b
 	|  |  |     ; 1.2.840.113549.1.1.11 sha256RSA
-	|  |  05 00                            ; NULL (0 ¹ÙÀÌÆ®)
-	|  30 5a                               ; SEQUENCE (5a ¹ÙÀÌÆ®)
-	|  |  31 0b                            ; SET (b ¹ÙÀÌÆ®)
-	|  |  |  30 09                         ; SEQUENCE (9 ¹ÙÀÌÆ®)
-	|  |  |     06 03                      ; OBJECT_ID (3 ¹ÙÀÌÆ®)
+	|  |  05 00                            ; NULL (0 ë°”ì´íŠ¸)
+	|  30 5a                               ; SEQUENCE (5a ë°”ì´íŠ¸)
+	|  |  31 0b                            ; SET (b ë°”ì´íŠ¸)
+	|  |  |  30 09                         ; SEQUENCE (9 ë°”ì´íŠ¸)
+	|  |  |     06 03                      ; OBJECT_ID (3 ë°”ì´íŠ¸)
 	|  |  |     |  55 04 06
-	|  |  |     |     ; 2.5.4.6 ±¹°¡/Áö¿ª (C)
-	|  |  |     13 02                      ; PRINTABLE_STRING (2 ¹ÙÀÌÆ®)
+	|  |  |     |     ; 2.5.4.6 êµ­ê°€/ì§€ì—­ (C)
+	|  |  |     13 02                      ; PRINTABLE_STRING (2 ë°”ì´íŠ¸)
 	|  |  |        41 55                                             ; AU
 	|  |  |           ; "AU"
-	|  |  31 13                            ; SET (13 ¹ÙÀÌÆ®)
-	|  |  |  30 11                         ; SEQUENCE (11 ¹ÙÀÌÆ®)
-	|  |  |     06 03                      ; OBJECT_ID (3 ¹ÙÀÌÆ®)
+	|  |  31 13                            ; SET (13 ë°”ì´íŠ¸)
+	|  |  |  30 11                         ; SEQUENCE (11 ë°”ì´íŠ¸)
+	|  |  |     06 03                      ; OBJECT_ID (3 ë°”ì´íŠ¸)
 	|  |  |     |  55 04 08
-	|  |  |     |     ; 2.5.4.8 ½Ã/µµ (S)
-	|  |  |     13 0a                      ; PRINTABLE_STRING (a ¹ÙÀÌÆ®)
+	|  |  |     |     ; 2.5.4.8 ì‹œ/ë„ (S)
+	|  |  |     13 0a                      ; PRINTABLE_STRING (a ë°”ì´íŠ¸)
 	|  |  |        53 6f 6d 65 2d 53 74 61  74 65                    ; Some-State
 	|  |  |           ; "Some-State"
-	|  |  31 21                            ; SET (21 ¹ÙÀÌÆ®)
-	|  |  |  30 1f                         ; SEQUENCE (1f ¹ÙÀÌÆ®)
-	|  |  |     06 03                      ; OBJECT_ID (3 ¹ÙÀÌÆ®)
+	|  |  31 21                            ; SET (21 ë°”ì´íŠ¸)
+	|  |  |  30 1f                         ; SEQUENCE (1f ë°”ì´íŠ¸)
+	|  |  |     06 03                      ; OBJECT_ID (3 ë°”ì´íŠ¸)
 	|  |  |     |  55 04 0a
-	|  |  |     |     ; 2.5.4.10 Á¶Á÷ (O)
-	|  |  |     13 18                      ; PRINTABLE_STRING (18 ¹ÙÀÌÆ®)
+	|  |  |     |     ; 2.5.4.10 ì¡°ì§ (O)
+	|  |  |     13 18                      ; PRINTABLE_STRING (18 ë°”ì´íŠ¸)
 	|  |  |        49 6e 74 65 72 6e 65 74  20 57 69 64 67 69 74 73  ; Internet Widgits
 	|  |  |        20 50 74 79 20 4c 74 64                           ;  Pty Ltd
 	|  |  |           ; "Internet Widgits Pty Ltd"
-	|  |  31 13                            ; SET (13 ¹ÙÀÌÆ®)
-	|  |     30 11                         ; SEQUENCE (11 ¹ÙÀÌÆ®)
-	|  |        06 03                      ; OBJECT_ID (3 ¹ÙÀÌÆ®)
+	|  |  31 13                            ; SET (13 ë°”ì´íŠ¸)
+	|  |     30 11                         ; SEQUENCE (11 ë°”ì´íŠ¸)
+	|  |        06 03                      ; OBJECT_ID (3 ë°”ì´íŠ¸)
 	|  |        |  55 04 03
-	|  |        |     ; 2.5.4.3 °øÅë ÀÌ¸§ (CN)
-	|  |        13 0a                      ; PRINTABLE_STRING (a ¹ÙÀÌÆ®)
+	|  |        |     ; 2.5.4.3 ê³µí†µ ì´ë¦„ (CN)
+	|  |        13 0a                      ; PRINTABLE_STRING (a ë°”ì´íŠ¸)
 	|  |           73 75 62 69 6e 74 65 72  43 41                    ; subinterCA
 	|  |              ; "subinterCA"
-	|  30 1e                               ; SEQUENCE (1e ¹ÙÀÌÆ®)
-	|  |  17 0d                            ; UTC_TIME (d ¹ÙÀÌÆ®)
+	|  30 1e                               ; SEQUENCE (1e ë°”ì´íŠ¸)
+	|  |  17 0d                            ; UTC_TIME (d ë°”ì´íŠ¸)
 	|  |  |  31 35 30 37 30 32 31 33  31 39 34 39 5a           ; 150702131949Z
-	|  |  |     ;  2015-07-02 ¿ÀÈÄ 10:19
-	|  |  17 0d                            ; UTC_TIME (d ¹ÙÀÌÆ®)
+	|  |  |     ;  2015-07-02 ì˜¤í›„ 10:19
+	|  |  17 0d                            ; UTC_TIME (d ë°”ì´íŠ¸)
 	|  |     33 35 30 37 30 32 31 33  31 39 34 39 5a           ; 350702131949Z
-	|  |        ;  2035-07-02 ¿ÀÈÄ 10:19
-	|  30 54                               ; SEQUENCE (54 ¹ÙÀÌÆ®)
-	|  |  31 0b                            ; SET (b ¹ÙÀÌÆ®)
-	|  |  |  30 09                         ; SEQUENCE (9 ¹ÙÀÌÆ®)
-	|  |  |     06 03                      ; OBJECT_ID (3 ¹ÙÀÌÆ®)
+	|  |        ;  2035-07-02 ì˜¤í›„ 10:19
+	|  30 54                               ; SEQUENCE (54 ë°”ì´íŠ¸)
+	|  |  31 0b                            ; SET (b ë°”ì´íŠ¸)
+	|  |  |  30 09                         ; SEQUENCE (9 ë°”ì´íŠ¸)
+	|  |  |     06 03                      ; OBJECT_ID (3 ë°”ì´íŠ¸)
 	|  |  |     |  55 04 06
-	|  |  |     |     ; 2.5.4.6 ±¹°¡/Áö¿ª (C)
-	|  |  |     13 02                      ; PRINTABLE_STRING (2 ¹ÙÀÌÆ®)
+	|  |  |     |     ; 2.5.4.6 êµ­ê°€/ì§€ì—­ (C)
+	|  |  |     13 02                      ; PRINTABLE_STRING (2 ë°”ì´íŠ¸)
 	|  |  |        41 55                                             ; AU
 	|  |  |           ; "AU"
-	|  |  31 13                            ; SET (13 ¹ÙÀÌÆ®)
-	|  |  |  30 11                         ; SEQUENCE (11 ¹ÙÀÌÆ®)
-	|  |  |     06 03                      ; OBJECT_ID (3 ¹ÙÀÌÆ®)
+	|  |  31 13                            ; SET (13 ë°”ì´íŠ¸)
+	|  |  |  30 11                         ; SEQUENCE (11 ë°”ì´íŠ¸)
+	|  |  |     06 03                      ; OBJECT_ID (3 ë°”ì´íŠ¸)
 	|  |  |     |  55 04 08
-	|  |  |     |     ; 2.5.4.8 ½Ã/µµ (S)
-	|  |  |     13 0a                      ; PRINTABLE_STRING (a ¹ÙÀÌÆ®)
+	|  |  |     |     ; 2.5.4.8 ì‹œ/ë„ (S)
+	|  |  |     13 0a                      ; PRINTABLE_STRING (a ë°”ì´íŠ¸)
 	|  |  |        53 6f 6d 65 2d 53 74 61  74 65                    ; Some-State
 	|  |  |           ; "Some-State"
-	|  |  31 21                            ; SET (21 ¹ÙÀÌÆ®)
-	|  |  |  30 1f                         ; SEQUENCE (1f ¹ÙÀÌÆ®)
-	|  |  |     06 03                      ; OBJECT_ID (3 ¹ÙÀÌÆ®)
+	|  |  31 21                            ; SET (21 ë°”ì´íŠ¸)
+	|  |  |  30 1f                         ; SEQUENCE (1f ë°”ì´íŠ¸)
+	|  |  |     06 03                      ; OBJECT_ID (3 ë°”ì´íŠ¸)
 	|  |  |     |  55 04 0a
-	|  |  |     |     ; 2.5.4.10 Á¶Á÷ (O)
-	|  |  |     13 18                      ; PRINTABLE_STRING (18 ¹ÙÀÌÆ®)
+	|  |  |     |     ; 2.5.4.10 ì¡°ì§ (O)
+	|  |  |     13 18                      ; PRINTABLE_STRING (18 ë°”ì´íŠ¸)
 	|  |  |        49 6e 74 65 72 6e 65 74  20 57 69 64 67 69 74 73  ; Internet Widgits
 	|  |  |        20 50 74 79 20 4c 74 64                           ;  Pty Ltd
 	|  |  |           ; "Internet Widgits Pty Ltd"
-	|  |  31 0d                            ; SET (d ¹ÙÀÌÆ®)
-	|  |     30 0b                         ; SEQUENCE (b ¹ÙÀÌÆ®)
-	|  |        06 03                      ; OBJECT_ID (3 ¹ÙÀÌÆ®)
+	|  |  31 0d                            ; SET (d ë°”ì´íŠ¸)
+	|  |     30 0b                         ; SEQUENCE (b ë°”ì´íŠ¸)
+	|  |        06 03                      ; OBJECT_ID (3 ë°”ì´íŠ¸)
 	|  |        |  55 04 03
-	|  |        |     ; 2.5.4.3 °øÅë ÀÌ¸§ (CN)
-	|  |        13 04                      ; PRINTABLE_STRING (4 ¹ÙÀÌÆ®)
+	|  |        |     ; 2.5.4.3 ê³µí†µ ì´ë¦„ (CN)
+	|  |        13 04                      ; PRINTABLE_STRING (4 ë°”ì´íŠ¸)
 	|  |           6c 65 61 66                                       ; leaf
 	|  |              ; "leaf"
-	|  30 82 01 22                         ; SEQUENCE (122 ¹ÙÀÌÆ®)
-	|  |  30 0d                            ; SEQUENCE (d ¹ÙÀÌÆ®)
-	|  |  |  06 09                         ; OBJECT_ID (9 ¹ÙÀÌÆ®)
+	|  30 82 01 22                         ; SEQUENCE (122 ë°”ì´íŠ¸)
+	|  |  30 0d                            ; SEQUENCE (d ë°”ì´íŠ¸)
+	|  |  |  06 09                         ; OBJECT_ID (9 ë°”ì´íŠ¸)
 	|  |  |  |  2a 86 48 86 f7 0d 01 01  01
 	|  |  |  |     ; 1.2.840.113549.1.1.1 RSA (RSA_SIGN)
-	|  |  |  05 00                         ; NULL (0 ¹ÙÀÌÆ®)
-	|  |  03 82 01 0f                      ; BIT_STRING (10f ¹ÙÀÌÆ®)
+	|  |  |  05 00                         ; NULL (0 ë°”ì´íŠ¸)
+	|  |  03 82 01 0f                      ; BIT_STRING (10f ë°”ì´íŠ¸)
 	|  |     00
-	|  |     30 82 01 0a                   ; SEQUENCE (10a ¹ÙÀÌÆ®)
-	|  |        02 82 01 01                ; INTEGER (101 ¹ÙÀÌÆ®)
+	|  |     30 82 01 0a                   ; SEQUENCE (10a ë°”ì´íŠ¸)
+	|  |        02 82 01 01                ; INTEGER (101 ë°”ì´íŠ¸)
 	|  |        |  00
 	|  |        |  bf 44 28 f5 60 bf 04 a0  3b d0 bb 50 25 dc 15 19
 	|  |        |  25 ea af d7 6e b7 77 10  9a 21 73 4d bf d2 69 69
@@ -1045,39 +1045,39 @@ void CTLS::SetCertificate(const char* server_certificate_base64, const char* cha
 	|  |        |  b2 6c cb 87 ca 18 fd 3f  ea 4a 59 73 c4 a9 f3 c5
 	|  |        |  8a e0 1e 05 6a e1 7d 21  5d 42 9a 80 09 50 2d 6f
 	|  |        |  27 18 5a 80 72 0a 7d 5b  45 8d 45 ac f0 63 e8 6d
-	|  |        02 03                      ; INTEGER (3 ¹ÙÀÌÆ®)
+	|  |        02 03                      ; INTEGER (3 ë°”ì´íŠ¸)
 	|  |           01 00 01
-	|  a3 4d                               ; OPTIONAL[3] (4d ¹ÙÀÌÆ®)
-	|     30 4b                            ; SEQUENCE (4b ¹ÙÀÌÆ®)
-	|        30 09                         ; SEQUENCE (9 ¹ÙÀÌÆ®)
-	|        |  06 03                      ; OBJECT_ID (3 ¹ÙÀÌÆ®)
+	|  a3 4d                               ; OPTIONAL[3] (4d ë°”ì´íŠ¸)
+	|     30 4b                            ; SEQUENCE (4b ë°”ì´íŠ¸)
+	|        30 09                         ; SEQUENCE (9 ë°”ì´íŠ¸)
+	|        |  06 03                      ; OBJECT_ID (3 ë°”ì´íŠ¸)
 	|        |  |  55 1d 13
-	|        |  |     ; 2.5.29.19 ±âº» Á¦ÇÑ
-	|        |  04 02                      ; OCTET_STRING (2 ¹ÙÀÌÆ®)
-	|        |     30 00                   ; SEQUENCE (0 ¹ÙÀÌÆ®)
-	|        30 1d                         ; SEQUENCE (1d ¹ÙÀÌÆ®)
-	|        |  06 03                      ; OBJECT_ID (3 ¹ÙÀÌÆ®)
+	|        |  |     ; 2.5.29.19 ê¸°ë³¸ ì œí•œ
+	|        |  04 02                      ; OCTET_STRING (2 ë°”ì´íŠ¸)
+	|        |     30 00                   ; SEQUENCE (0 ë°”ì´íŠ¸)
+	|        30 1d                         ; SEQUENCE (1d ë°”ì´íŠ¸)
+	|        |  06 03                      ; OBJECT_ID (3 ë°”ì´íŠ¸)
 	|        |  |  55 1d 0e
-	|        |  |     ; 2.5.29.14 ÁÖÃ¼ Å° ½Äº°ÀÚ
-	|        |  04 16                      ; OCTET_STRING (16 ¹ÙÀÌÆ®)
-	|        |     04 14                   ; OCTET_STRING (14 ¹ÙÀÌÆ®)
+	|        |  |     ; 2.5.29.14 ì£¼ì²´ í‚¤ ì‹ë³„ìž
+	|        |  04 16                      ; OCTET_STRING (16 ë°”ì´íŠ¸)
+	|        |     04 14                   ; OCTET_STRING (14 ë°”ì´íŠ¸)
 	|        |        1c 1d c4 fe f1 25 46 21  19 4d f5 84 ee 33 da e5  ; .....%F!.M...3..
 	|        |        cf b5 19 7f                                       ; ....
-	|        30 1f                         ; SEQUENCE (1f ¹ÙÀÌÆ®)
-	|           06 03                      ; OBJECT_ID (3 ¹ÙÀÌÆ®)
+	|        30 1f                         ; SEQUENCE (1f ë°”ì´íŠ¸)
+	|           06 03                      ; OBJECT_ID (3 ë°”ì´íŠ¸)
 	|           |  55 1d 23
-	|           |     ; 2.5.29.35 ±â°ü Å° ½Äº°ÀÚ
-	|           04 18                      ; OCTET_STRING (18 ¹ÙÀÌÆ®)
-	|              30 16                   ; SEQUENCE (16 ¹ÙÀÌÆ®)
-	|                 80 14                ; CONTEXT_SPECIFIC[0] (14 ¹ÙÀÌÆ®)
+	|           |     ; 2.5.29.35 ê¸°ê´€ í‚¤ ì‹ë³„ìž
+	|           04 18                      ; OCTET_STRING (18 ë°”ì´íŠ¸)
+	|              30 16                   ; SEQUENCE (16 ë°”ì´íŠ¸)
+	|                 80 14                ; CONTEXT_SPECIFIC[0] (14 ë°”ì´íŠ¸)
 	|                    e9 67 7d 10 74 c1 9a ae  b8 4c 3f 09 3e 1c 70 15  ; .g}.t....L?.>.p.
 	|                    dd 1f 1a 4f                                       ; ...O
-	30 0d                                  ; SEQUENCE (d ¹ÙÀÌÆ®)
-	|  06 09                               ; OBJECT_ID (9 ¹ÙÀÌÆ®)
+	30 0d                                  ; SEQUENCE (d ë°”ì´íŠ¸)
+	|  06 09                               ; OBJECT_ID (9 ë°”ì´íŠ¸)
 	|  |  2a 86 48 86 f7 0d 01 01  0b
 	|  |     ; 1.2.840.113549.1.1.11 sha256RSA
-	|  05 00                               ; NULL (0 ¹ÙÀÌÆ®)
-	03 82 01 01                            ; BIT_STRING (101 ¹ÙÀÌÆ®)
+	|  05 00                               ; NULL (0 ë°”ì´íŠ¸)
+	03 82 01 01                            ; BIT_STRING (101 ë°”ì´íŠ¸)
 	00
 	1a 39 92 90 5f 22 b3 eb  f4 fd 12 dc 9d 24 62 09
 	71 0d cf ec 8d 8b 8a 45  08 0b 7a 74 eb 53 e8 6b
@@ -1156,7 +1156,7 @@ void CTLS::SendClientHello(const unsigned char* sessionid32, const unsigned char
 
 	unsigned char packet[128];
 	packet[0] = m_Version>>8; // version_high
-	packet[1] = m_Version&255; // version_low (1.1 ·Î ¿äÃ» 0x302)
+	packet[1] = m_Version&255; // version_low (1.1 ë¡œ ìš”ì²­ 0x302)
 	unsigned long random_gmt_unix_time = (unsigned long)time(NULL);
 	packet[5] = (random_gmt_unix_time >> 24) & 255;
 	packet[4] = (random_gmt_unix_time >> 16) & 255;
